@@ -11,6 +11,8 @@ services:
   cam-app:
     build: .
     restart: unless-stopped
+    ports:
+      - "5000:5000"
     environment:
       - CAM_SECRET_KEY=${CAM_SECRET_KEY}
       - CAM_USER=${CAM_USER}
@@ -21,17 +23,4 @@ services:
     volumes:
       - ./recordings:/recordings:ro
     depends_on:
-      - mediamtx
-
-  nginx:
-    image: nginx:alpine
-    restart: unless-stopped
-    ports:
-      - "8080:80"
-    volumes:
-      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./static:/static:ro
-      - ./recordings:/recordings:ro
-    depends_on:
-      - cam-app
       - mediamtx
