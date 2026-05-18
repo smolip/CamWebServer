@@ -17,8 +17,10 @@ services:
     environment:
       - MEDIAMTX_HOST=mediamtx
       - RECS_DIR=/recordings
+      - DATABASE=/app/data/cam.db
     volumes:
       - ./recordings:/recordings:ro
       - ./config.py:/app/config.py:ro
+      - ./data:/app/data
     depends_on:
       - mediamtx

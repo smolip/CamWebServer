@@ -24,7 +24,15 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     schema = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'schema.sql')
     with app.app_context():
+        os.makedirs(os.path.dirname(app.config['DATABASE']), exist_ok=True)
         db = get_db()
         with open(schema) as f:
             db.executescript(f.read())
+        # Zavři otevřené události z předchozího běhu
+        db.execute("""
+            UPDATE events
+            SET ended_at   = strftime('%Y-%m-%dT%H:%M:%S','now'),
+                duration_s = CAST((julianday('now') - julianday(triggered_at)) * 86400 AS INTEGER)
+            WHERE ended_at IS NULL
+        """)
         db.commit()

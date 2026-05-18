@@ -31,6 +31,12 @@ def create_app():
     if os.path.exists(config_file):
         app.config.from_pyfile(config_file)
 
+    # Env vars z docker-compose přepíší config.py
+    for key, env in [('DATABASE', 'DATABASE'), ('RECS_DIR', 'RECS_DIR'),
+                     ('MEDIAMTX_HOST', 'MEDIAMTX_HOST'), ('ESP32_IP', 'ESP32_IP')]:
+        if env in os.environ:
+            app.config[key] = os.environ[env]
+
     # Správné IP adresy přes VPS → WireGuard → RPi proxy řetěz
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
