@@ -16,10 +16,13 @@ def _launch(esp_ip, mediamtx_host='localhost', retries=5, delay=0):
             if ffmpeg_proc and ffmpeg_proc.poll() is None:
                 return
             proc = subprocess.Popen([
-                'ffmpeg', '-re',
+                'ffmpeg',
+                '-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5',
                 '-i', f'http://{esp_ip}:81/stream',
-                '-c:v', 'libx264', '-preset', 'ultrafast',
-                '-f', 'rtsp', f'rtsp://{mediamtx_host}:8554/cam',
+                '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency',
+                '-g', '15', '-keyint_min', '15',
+                '-f', 'rtsp', '-rtsp_transport', 'tcp',
+                f'rtsp://{mediamtx_host}:8554/cam',
             ])
             ffmpeg_proc = proc
         proc.wait()
