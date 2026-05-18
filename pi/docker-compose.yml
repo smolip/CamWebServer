@@ -13,12 +13,11 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
-    env_file:
-      - .env
     environment:
       - MEDIAMTX_HOST=mediamtx
       - RECS_DIR=/recordings
     volumes:
       - ./recordings:/recordings:ro
+      - ./config.py:/app/config.py:ro
     depends_on:
       - mediamtx
