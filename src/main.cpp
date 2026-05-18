@@ -11,8 +11,8 @@ const char *ssid     = "ASUS2";
 const char *password = "PetrSmolik";
 
 #define PIR_PIN          3
-#define PIR_NOTIFY_URL   "http://192.168.1.10:8080/motion"
-#define PIR_IDLE_URL     "http://192.168.1.10:8080/idle"
+#define PIR_NOTIFY_URL   "http://192.168.0.65:8080/motion"
+#define PIR_IDLE_URL     "http://192.168.0.65:8080/idle"
 #define IDLE_TIMEOUT_MS  100000   // 30s bez pohybu → sleep
 
 static void goToSleep() {
