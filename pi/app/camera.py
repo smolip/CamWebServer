@@ -69,6 +69,11 @@ def stop_stream(force=False):
         ffmpeg_proc = None
 
 
+def is_manual():
+    with _lock:
+        return _manual
+
+
 def get_status():
     with _lock:
         running = ffmpeg_proc is not None and ffmpeg_proc.poll() is None

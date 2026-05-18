@@ -8,6 +8,9 @@ events_bp = Blueprint('events', __name__)
 @events_bp.route('/motion', methods=['POST'])
 def motion():
     """Webhook od ESP32 — detekce pohybu. Bez autentizace, omezeno na LAN v nginx."""
+    if camera.is_manual():
+        return jsonify({'ok': True, 'skipped': 'manual stream active'})
+
     camera.start_stream(current_app.config['ESP32_IP'], current_app.config['MEDIAMTX_HOST'], delay=7)
     db = get_db()
     cur = db.execute("INSERT INTO events (source) VALUES ('pir')")
@@ -19,6 +22,9 @@ def motion():
 @events_bp.route('/idle', methods=['POST'])
 def idle():
     """Webhook od ESP32 — klid, ESP32 jde do deep sleep."""
+    if camera.is_manual():
+        return jsonify({'ok': True, 'skipped': 'manual stream active'})
+
     camera.stop_stream(force=False)
     event_id = camera.current_event_id
     if event_id:

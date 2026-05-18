@@ -156,6 +156,7 @@ if (document.getElementById('recList')) {
           </div>
           <div class="rec-video-wrap" id="videoWrap${i}">
             <video controls preload="none">
+              <source src="/recordings/${f}" type='video/mp4; codecs="avc1.42E01E"'>
               <source src="/recordings/${f}" type="video/mp4">
             </video>
           </div>
