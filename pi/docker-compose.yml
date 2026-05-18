@@ -9,7 +9,7 @@ services:
       - /home/pi/recordings:/recordings
 
   cam-app:
-    build: ./pi
+    build: .
     restart: unless-stopped
     environment:
       - CAM_SECRET_KEY=${CAM_SECRET_KEY}
@@ -32,7 +32,7 @@ services:
       - "8080:80"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./pi/static:/static:ro
+      - ./static:/static:ro
       - /home/pi/recordings:/recordings:ro
     depends_on:
       - cam-app

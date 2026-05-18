@@ -12,4 +12,4 @@ pi/app/__pycache__/
 pi/*.pyc
 
 # Docker
-.env
+pi/.env
