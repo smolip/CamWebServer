@@ -18,10 +18,8 @@ services:
       - ESP32_IP=${ESP32_IP}
       - MEDIAMTX_HOST=mediamtx
       - RECS_DIR=/recordings
-      - DATABASE=/data/cam.db
     volumes:
       - ./recordings:/recordings:ro
-      - ./data:/data
     depends_on:
       - mediamtx
 
