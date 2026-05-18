@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request
+import os
+from flask import Blueprint, render_template, request, send_from_directory, current_app, abort
 from flask_login import login_required
 from .db import get_db
 
@@ -31,3 +32,13 @@ def events():
 @login_required
 def recordings_page():
     return render_template('recordings.html')
+
+
+@views_bp.route('/rec/<path:filename>')
+@login_required
+def serve_recording(filename):
+    recs_dir = current_app.config['RECS_DIR']
+    safe = os.path.normpath(filename)
+    if safe.startswith('..'):
+        abort(400)
+    return send_from_directory(recs_dir, safe)

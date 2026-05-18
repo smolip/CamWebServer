@@ -157,12 +157,12 @@ if (document.getElementById('recList')) {
             ${meta ? `<span class="rec-meta">${meta}</span>` : ''}
             <div class="rec-actions">
               <a onclick="toggleVideo(${i})" id="playBtn${i}">▶ Přehrát</a>
-              <a href="/recordings/${f}" download>↓ Stáhnout</a>
+              <a href="/rec/${f}" download>↓ Stáhnout</a>
             </div>
           </div>
           <div class="rec-video-wrap" id="videoWrap${i}">
             <video controls preload="none">
-              <source src="/recordings/${f}" type="video/mp4">
+              <source src="/rec/${f}" type="video/mp4">
             </video>
           </div>
         </div>`;
