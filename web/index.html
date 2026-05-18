@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamera</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 28px 16px;
+    }
+
+    .container { max-width: 860px; margin: 0 auto; }
+
+    h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 28px; letter-spacing: 0.01em; }
+    h2 { font-size: 0.8rem; font-weight: 500; color: #555; text-transform: uppercase;
+         letter-spacing: 0.08em; margin-bottom: 14px; }
+
+    /* ── Stream ─────────────────────────────── */
+    .stream-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #555;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #333;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .dot.live {
+      background: #22c55e;
+      box-shadow: 0 0 7px #22c55e88;
+    }
+
+    button {
+      background: #1c1c1c;
+      color: #d0d0d0;
+      border: 1px solid #2e2e2e;
+      padding: 8px 18px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    button:hover  { background: #252525; }
+    button.active { border-color: #22c55e88; color: #22c55e; }
+
+    #video {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: 10px;
+      background: #000;
+      display: none;
+      margin-bottom: 36px;
+    }
+
+    #video.visible { display: block; }
+
+    /* ── Recordings ─────────────────────────── */
+    .rec-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .rec-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #161616;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 13px 16px;
+    }
+
+    .rec-time {
+      font-size: 0.88rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rec-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    .rec-actions a {
+      background: #1c1c1c;
+      color: #c0c0c0;
+      border: 1px solid #2e2e2e;
+      padding: 6px 13px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: background 0.15s;
+    }
+
+    .rec-actions a:hover { background: #252525; }
+
+    .empty { color: #444; font-size: 0.88rem; padding: 12px 0; }
+
+    @media (max-width: 480px) {
+      .rec-item    { flex-direction: column; align-items: flex-start; }
+      .rec-actions { width: 100%; }
+      .rec-actions a { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Kamera</h1>
+
+  <div class="stream-bar">
+    <button id="streamBtn">▶ Spustit stream</button>
+    <div class="pill">
+      <div class="dot" id="dot"></div>
+      <span id="statusText">—</span>
+    </div>
+  </div>
+
+  <video id="video" controls playsinline></video>
+
+  <h2>Záznamy</h2>
+  <div class="rec-list" id="recList">
+    <div class="empty">Načítám…</div>
+  </div>
+
+</div>
+<script>
+const HLS_URL  = '/live/cam/index.m3u8';
+const RECS_API = '/api/recordings';
+
+// ── Stream status ────────────────────────────────────────
+const video  = document.getElementById('video');
+const btn    = document.getElementById('streamBtn');
+const dot    = document.getElementById('dot');
+const stText = document.getElementById('statusText');
+let hls = null;
+
+async function checkOnline() {
+  try {
+    const r = await fetch(HLS_URL, { method: 'HEAD', cache: 'no-store' });
+    return r.ok;
+  } catch { return false; }
+}
+
+async function updateStatus() {
+  const online = await checkOnline();
+  dot.className      = 'dot' + (online ? ' live' : '');
+  stText.textContent = online ? 'Online' : 'Offline';
+  return online;
+}
+
+// ── Stream toggle ────────────────────────────────────────
+btn.addEventListener('click', async () => {
+  if (hls || video.src) {
+    stopStream();
+    return;
+  }
+
+  const online = await updateStatus();
+  if (!online) {
+    stText.textContent = 'Offline – kamera spí';
+    return;
+  }
+
+  startStream();
+});
+
+function startStream() {
+  video.classList.add('visible');
+  btn.textContent = '⏹ Zastavit';
+  btn.classList.add('active');
+
+  if (Hls.isSupported()) {
+    hls = new Hls({ lowLatencyMode: true });
+    hls.loadSource(HLS_URL);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+    hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) stopStream(); });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = HLS_URL;
+    video.play();
+  }
+}
+
+function stopStream() {
+  if (hls) { hls.destroy(); hls = null; }
+  video.src = '';
+  video.classList.remove('visible');
+  btn.textContent = '▶ Spustit stream';
+  btn.classList.remove('active');
+}
+
+updateStatus();
+setInterval(updateStatus, 10000);
+
+// ── Recordings ───────────────────────────────────────────
+function formatFilename(path) {
+  const m = path.match(/(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+  if (!m) return path;
+  return `${m[3]}.${m[2]}.${m[1]}  ${m[4]}:${m[5]}:${m[6]}`;
+}
+
+async function loadRecordings() {
+  const list = document.getElementById('recList');
+  try {
+    const files = await fetch(RECS_API).then(r => r.json());
+    if (!files.length) {
+      list.innerHTML = '<div class="empty">Žádné záznamy</div>';
+      return;
+    }
+    list.innerHTML = files.map(f => `
+      <div class="rec-item">
+        <span class="rec-time">${formatFilename(f)}</span>
+        <div class="rec-actions">
+          <a href="/recordings/${f}" target="_blank">▶ Přehrát</a>
+          <a href="/recordings/${f}" download>↓ Stáhnout</a>
+        </div>
+      </div>
+    `).join('');
+  } catch {
+    list.innerHTML = '<div class="empty">Chyba při načítání</div>';
+  }
+}
+
+loadRecordings();
+setInterval(loadRecordings, 30000);
+</script>
+</body>
+</html>

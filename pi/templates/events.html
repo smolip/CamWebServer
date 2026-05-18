@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Události — Kamera{% endblock %}
+
+{% block content %}
+<h1>Události pohybu</h1>
+
+{% if events %}
+  <table class="events-table">
+    <thead>
+      <tr>
+        <th>Čas</th>
+        <th>Zdroj</th>
+        <th>Trvání</th>
+        <th>Nahrávka</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ev in events %}
+      <tr>
+        <td>{{ ev['triggered_at'] | replace('T', ' ') }}</td>
+        <td>
+          {% if ev['source'] == 'pir' %}
+            <span class="badge badge-pir">PIR</span>
+          {% else %}
+            <span class="badge badge-manual">Ručně</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if ev['duration_s'] %}
+            {% set s = ev['duration_s'] %}
+            {% if s < 60 %}{{ s }} s
+            {% else %}{{ (s // 60) }} min {{ (s % 60) }} s
+            {% endif %}
+          {% else %}
+            —
+          {% endif %}
+        </td>
+        <td>
+          {% if ev['recording_path'] %}
+            <a href="/recordings/{{ ev['recording_path'] }}" target="_blank"
+               style="color:#60a5fa; font-size:0.85rem;">▶ Přehrát</a>
+          {% else %}
+            <span style="color:#444">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    {% if page > 1 %}
+      <a href="{{ url_for('views.events', page=page-1) }}">← Novější</a>
+    {% endif %}
+    <span class="page-info">Strana {{ page }}</span>
+    {% if has_next %}
+      <a href="{{ url_for('views.events', page=page+1) }}">Starší →</a>
+    {% endif %}
+  </div>
+
+{% else %}
+  <div class="empty">Žádné události pohybu zatím.</div>
+{% endif %}
+{% endblock %}

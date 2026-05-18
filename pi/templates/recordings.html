@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Záznamy — Kamera{% endblock %}
+
+{% block content %}
+<h1>Záznamy</h1>
+<div class="rec-list" id="recList">
+  <div class="empty">Načítám…</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

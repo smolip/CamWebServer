@@ -1,0 +1,13 @@
+# Zkopíruj jako config.py a vyplň hodnoty.
+# config.py je v .gitignore — nikdy ho necommituj.
+#
+# Generování hesla:
+#   python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('tvoje_heslo'))"
+
+SECRET_KEY = 'vygeneruj-nahodny-klic-aspon-32-znaku'  # os.urandom(32).hex()
+ADMIN_USER = 'admin'
+ADMIN_HASH = ''  # pbkdf2:sha256:... z generate_password_hash
+
+ESP32_IP  = '192.168.1.50'       # zjistíš ze Serial monitoru po prvním flashu
+RECS_DIR  = '/home/pi/recordings'
+DATABASE  = '/home/pi/cam/cam.db'

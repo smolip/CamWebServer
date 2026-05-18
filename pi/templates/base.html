@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Kamera{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="nav-brand">Kamera</span>
+    <div class="nav-links">
+      <a href="{{ url_for('views.index') }}"
+         {% if request.endpoint == 'views.index' %}class="active"{% endif %}>Stream</a>
+      <a href="{{ url_for('views.events') }}"
+         {% if request.endpoint == 'views.events' %}class="active"{% endif %}>Události</a>
+      <a href="{{ url_for('views.recordings_page') }}"
+         {% if request.endpoint == 'views.recordings_page' %}class="active"{% endif %}>Záznamy</a>
+      <a href="{{ url_for('auth.logout') }}">Odhlásit</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

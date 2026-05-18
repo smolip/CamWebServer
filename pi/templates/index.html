@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Stream</h1>
+
+<div class="stream-bar">
+  <button id="streamBtn">▶ Spustit stream</button>
+  <div class="pill">
+    <div class="dot" id="dot"></div>
+    <span id="statusText">—</span>
+  </div>
+</div>
+
+<video id="video" controls playsinline></video>
+
+<div class="events-mini">
+  <h2>Poslední události</h2>
+  <div id="eventMiniList">
+    <div class="empty">Načítám…</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
