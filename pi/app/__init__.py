@@ -17,9 +17,10 @@ def create_app():
 
     app.config.update(
         SECRET_KEY=os.environ.get('CAM_SECRET_KEY', 'dev-secret-change-me'),
-        DATABASE=os.path.join(base_dir, 'cam.db'),
-        RECS_DIR='/home/pi/recordings',
+        DATABASE=os.environ.get('DATABASE', os.path.join(base_dir, 'cam.db')),
+        RECS_DIR=os.environ.get('RECS_DIR', '/home/pi/recordings'),
         ESP32_IP=os.environ.get('ESP32_IP', '192.168.1.50'),
+        MEDIAMTX_HOST=os.environ.get('MEDIAMTX_HOST', 'localhost'),
         ADMIN_USER=os.environ.get('CAM_USER', 'admin'),
         ADMIN_HASH=os.environ.get('CAM_HASH', ''),
         SESSION_COOKIE_SAMESITE='Lax',

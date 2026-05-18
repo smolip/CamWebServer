@@ -8,7 +8,7 @@ events_bp = Blueprint('events', __name__)
 @events_bp.route('/motion', methods=['POST'])
 def motion():
     """Webhook od ESP32 — detekce pohybu. Bez autentizace, omezeno na LAN v nginx."""
-    camera.start_stream(current_app.config['ESP32_IP'])
+    camera.start_stream(current_app.config['ESP32_IP'], current_app.config['MEDIAMTX_HOST'])
     db = get_db()
     cur = db.execute("INSERT INTO events (source) VALUES ('pir')")
     db.commit()

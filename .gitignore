@@ -10,3 +10,6 @@ pi/cam.db
 pi/__pycache__/
 pi/app/__pycache__/
 pi/*.pyc
+
+# Docker
+.env
