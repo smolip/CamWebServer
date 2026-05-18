@@ -48,11 +48,13 @@ if (document.getElementById('streamBtn')) {
     btn.classList.add('active');
 
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-      hls = new Hls({ lowLatencyMode: true });
+      hls = new Hls({ lowLatencyMode: true, manifestLoadingMaxRetry: 6, manifestLoadingRetryDelay: 2000 });
       hls.loadSource(HLS_URL);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-      hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) stopHls(); });
+      hls.on(Hls.Events.ERROR, (_, d) => {
+        if (d.fatal && d.type !== Hls.ErrorTypes.NETWORK_ERROR) stopHls();
+      });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = HLS_URL;
       video.play();
@@ -78,10 +80,18 @@ if (document.getElementById('streamBtn')) {
     btn.textContent = 'Spouštím…';
     try {
       await fetch('/api/stream/start', { method: 'POST' });
-      // Počkáme ~3 s než ffmpeg + MediaMTX stream nastartuje
-      await new Promise(r => setTimeout(r, 3000));
-      await updateStatus();
-      startHls();
+      // Čekáme až ffmpeg nastartuje (max 20 s, kontrola každé 2 s)
+      let running = false;
+      for (let i = 0; i < 10; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        running = await updateStatus();
+        if (running) break;
+      }
+      if (running) {
+        startHls();
+      } else {
+        btn.textContent = '▶ Spustit stream';
+      }
     } finally {
       btn.disabled = false;
     }

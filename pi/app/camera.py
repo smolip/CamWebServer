@@ -7,11 +7,10 @@ current_event_id = None
 _lock = threading.Lock()
 
 
-def _launch(esp_ip, mediamtx_host='localhost', retries=5, delay=7):
-    """Spustí ffmpeg v samostatném vlákně s retry logikou.
-    Čeká delay sekund — ESP32 potřebuje čas na WiFi reconnect po deep sleep."""
+def _launch(esp_ip, mediamtx_host='localhost', retries=5, delay=0):
     global ffmpeg_proc
-    time.sleep(delay)
+    if delay:
+        time.sleep(delay)
     for _ in range(retries):
         with _lock:
             if ffmpeg_proc and ffmpeg_proc.poll() is None:
@@ -29,12 +28,11 @@ def _launch(esp_ip, mediamtx_host='localhost', retries=5, delay=7):
         time.sleep(3)
 
 
-def start_stream(esp_ip, mediamtx_host='localhost'):
-    """Spustí stream; vrací False pokud už běží."""
+def start_stream(esp_ip, mediamtx_host='localhost', delay=0):
     with _lock:
         if ffmpeg_proc and ffmpeg_proc.poll() is None:
             return False
-    threading.Thread(target=_launch, args=(esp_ip, mediamtx_host), daemon=True).start()
+    threading.Thread(target=_launch, args=(esp_ip, mediamtx_host, 5, delay), daemon=True).start()
     return True
 
 
