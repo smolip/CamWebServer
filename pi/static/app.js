@@ -145,10 +145,16 @@ if (document.getElementById('recList')) {
         list.innerHTML = '<div class="empty">Žádné záznamy</div>';
         return;
       }
-      list.innerHTML = files.map((f, i) => `
+      list.innerHTML = files.map((rec, i) => {
+        const f = rec.path || rec;
+        const dur = rec.duration ? fmtDuration(rec.duration) : '';
+        const sz  = rec.size ? (rec.size / 1048576).toFixed(1) + ' MB' : '';
+        const meta = [dur, sz].filter(Boolean).join(' · ');
+        return `
         <div class="rec-item-inner">
           <div class="rec-item" style="flex-wrap:wrap">
             <span class="rec-time">${formatFilename(f)}</span>
+            ${meta ? `<span class="rec-meta">${meta}</span>` : ''}
             <div class="rec-actions">
               <a onclick="toggleVideo(${i})" id="playBtn${i}">▶ Přehrát</a>
               <a href="/recordings/${f}" download>↓ Stáhnout</a>
@@ -159,8 +165,8 @@ if (document.getElementById('recList')) {
               <source src="/recordings/${f}" type="video/mp4">
             </video>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     } catch {
       list.innerHTML = '<div class="empty">Chyba při načítání</div>';
     }

@@ -201,6 +201,7 @@ button.active { border-color: #22c55e88; color: #22c55e; }
   font-variant-numeric: tabular-nums;
 }
 
+.rec-meta { font-size: 0.78rem; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
 .rec-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
 .rec-actions a {

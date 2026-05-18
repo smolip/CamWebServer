@@ -1,5 +1,7 @@
 import glob
+import json
 import os
+import subprocess
 from flask import Blueprint, jsonify, request, current_app
 from flask_login import login_required
 from .db import get_db
@@ -44,6 +46,17 @@ def stream_status():
     return jsonify(camera.get_status())
 
 
+def _probe_duration(path):
+    try:
+        out = subprocess.check_output(
+            ['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', path],
+            timeout=10, stderr=subprocess.DEVNULL,
+        )
+        return round(float(json.loads(out)['format'].get('duration', 0)))
+    except Exception:
+        return None
+
+
 @api_bp.route('/recordings')
 @login_required
 def recordings():
@@ -52,7 +65,13 @@ def recordings():
         glob.glob(os.path.join(recs_dir, '**', '*.mp4'), recursive=True),
         reverse=True,
     )
-    return jsonify([os.path.relpath(f, recs_dir) for f in files])
+    result = []
+    for f in files:
+        rel = os.path.relpath(f, recs_dir)
+        size = os.path.getsize(f)
+        duration = _probe_duration(f)
+        result.append({'path': rel, 'size': size, 'duration': duration})
+    return jsonify(result)
 
 
 @api_bp.route('/events')
