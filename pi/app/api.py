@@ -11,7 +11,7 @@ api_bp = Blueprint('api', __name__)
 @api_bp.route('/stream/start', methods=['POST'])
 @login_required
 def stream_start():
-    started = camera.start_stream(current_app.config['ESP32_IP'], current_app.config['MEDIAMTX_HOST'])
+    started = camera.start_stream(current_app.config['ESP32_IP'], current_app.config['MEDIAMTX_HOST'], manual=True)
     if started:
         db = get_db()
         cur = db.execute("INSERT INTO events (source) VALUES ('manual')")
@@ -23,7 +23,7 @@ def stream_start():
 @api_bp.route('/stream/stop', methods=['POST'])
 @login_required
 def stream_stop():
-    camera.stop_stream()
+    camera.stop_stream(force=True)
     event_id = camera.current_event_id
     if event_id:
         db = get_db()

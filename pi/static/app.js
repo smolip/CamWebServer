@@ -48,12 +48,21 @@ if (document.getElementById('streamBtn')) {
     btn.classList.add('active');
 
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-      hls = new Hls({ lowLatencyMode: true, manifestLoadingMaxRetry: 6, manifestLoadingRetryDelay: 2000 });
+      let recoveries = 0;
+      hls = new Hls({ lowLatencyMode: true, manifestLoadingMaxRetry: 8, manifestLoadingRetryDelay: 2000 });
       hls.loadSource(HLS_URL);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
       hls.on(Hls.Events.ERROR, (_, d) => {
-        if (d.fatal && d.type !== Hls.ErrorTypes.NETWORK_ERROR) stopHls();
+        if (!d.fatal) return;
+        if (recoveries++ >= 4) { stopHls(); return; }
+        if (d.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          hls.startLoad();
+        } else if (d.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError();
+        } else {
+          stopHls();
+        }
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = HLS_URL;

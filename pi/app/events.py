@@ -19,7 +19,7 @@ def motion():
 @events_bp.route('/idle', methods=['POST'])
 def idle():
     """Webhook od ESP32 — klid, ESP32 jde do deep sleep."""
-    camera.stop_stream()
+    camera.stop_stream(force=False)
     event_id = camera.current_event_id
     if event_id:
         db = get_db()
