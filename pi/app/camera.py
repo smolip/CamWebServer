@@ -27,6 +27,7 @@ def _launch(esp_ip, mediamtx_host='localhost', delay=0):
             'ffmpeg', '-hide_banner',
             '-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5',
             '-i', f'http://{esp_ip}:81/stream',
+            '-pix_fmt', 'yuv420p',
             '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'zerolatency',
             '-profile:v', 'baseline', '-level', '3.1',
             '-g', '30', '-keyint_min', '30',
