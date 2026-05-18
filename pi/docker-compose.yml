@@ -3,7 +3,7 @@ services:
     image: bluenviron/mediamtx:latest
     restart: unless-stopped
     ports:
-      - "8554:8554"   # RTSP (ffmpeg pushuje sem z cam-app)
+      - "8554:8554"
     volumes:
       - ./docker/mediamtx.yml:/mediamtx.yml:ro
       - ./recordings:/recordings
@@ -21,7 +21,7 @@ services:
       - DATABASE=/data/cam.db
     volumes:
       - ./recordings:/recordings:ro
-      - cam-data:/data
+      - ./data:/data
     depends_on:
       - mediamtx
 
@@ -37,6 +37,3 @@ services:
     depends_on:
       - cam-app
       - mediamtx
-
-volumes:
-  cam-data:
